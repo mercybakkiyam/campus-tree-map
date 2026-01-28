@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+<meta charset="utf-8">
+<title>Stella Maris Tree Map</title>
+
+<link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-control-search/dist/leaflet-search.css"/>
+
+<style>
+body { margin: 0; font-family: Arial, sans-serif; }
+#map { height: 100vh; width: 100%; }
+.leaflet-control-search {
+  display: block !important;
+  z-index: 1000;
+}
+
+
+.leaflet-popup-content-wrapper {
+  border-radius: 12px;
+  box-shadow: 0 6px 16px rgba(0,128,0,0.4);
+  border: 1px solid #007f00;
+}
+
+.popup-card {
+  display: flex;
+  gap: 12px;
+  max-width: 320px;
+  padding: 12px;
+  font-size: 14px;
+}
+
+.popup-card img {
+  width: 80px;
+  height: 80px;
+  object-fit: cover;
+  border-radius: 6px;
+  border: 2px solid #007f00;
+}
+
+.popup-content p {
+  margin: 4px 0;
+  font-size: 13px;
+}
+
+.popup-content .label {
+  font-weight: bold;
+  color: #007f00;
+}
+
+.popup-content a {
+  display: inline-block;
+  margin-top: 6px;
+  padding: 4px 8px;
+  background: #007f00;
+  color: white;
+  text-decoration: none;
+  border-radius: 5px;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+<div id="map"></div>
+
+<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+<script src="https://unpkg.com/leaflet-control-search/dist/leaflet-search.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+
+<script src="script.js"></script>
+</body>
+</html>
