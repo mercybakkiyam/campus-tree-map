@@ -136,6 +136,7 @@ function createDot(lat, lon, popupContent) {
 const treeLayer = L.layerGroup().addTo(map);
 const allTrees = [];
 
+
 //for search
 
 let searchText = ""; 
@@ -164,7 +165,7 @@ function refreshMarkers() {
 map.on("zoomend", refreshMarkers);
 
 // ===============================
-// 7. LOAD CSV
+// 8. LOAD CSV
 // ===============================
 Papa.parse("trees.csv", {
   download: true,
@@ -191,29 +192,23 @@ Papa.parse("trees.csv", {
 
       const category = getTreeCategory(tree.TreeName || "");
 
-      // Create tree icon
-      const marker = L.marker([lat, lon], { icon: icons[category] })
-        .bindPopup(popupContent);
-
-      // Create dot
+      const marker = L.marker([lat, lon], { icon: icons[category] }).bindPopup(popupContent);
       const dot = createDot(lat, lon, popupContent);
-
-      // Search fields
+      //for search
       marker.treeName = (tree.TreeName || "").toLowerCase();
       marker.botanicalName = (tree.BotanicalName || "").toLowerCase();
-      dot.treeName = marker.treeName;
-      dot.botanicalName = marker.botanicalName;
 
-      allTrees.push({ marker, dot });
+      allTrees.push({ marker, dot, category });
     });
 
-    map.on("zoomend", refreshMarkers);
     refreshMarkers();
+  }
+});
 
-    // ===============================
-    // 9. SEARCH
-    // ===============================
-    const searchControl = L.control({ position: "topleft" });
+// ===============================
+// 9. SEARCH BAR
+// ===============================
+const searchControl = L.control({ position: "topleft" });
 
 searchControl.onAdd = function () {
   const div = L.DomUtil.create("div", "leaflet-control custom");
@@ -239,5 +234,3 @@ document.getElementById("treeSearch").addEventListener("input", e => {
     refreshMarkers();
   }, 300);
 });
-
-
