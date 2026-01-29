@@ -6,6 +6,8 @@ const campusBounds = [
   [13.0482, 80.2552]
 ];
 
+
+
 // ===============================
 // 2. MAP
 // ===============================
@@ -13,19 +15,68 @@ const map = L.map('map', {
   minZoom: 18,
   maxZoom: 23,
   maxBounds: campusBounds,
-  maxBoundsViscosity: 1.0
-}).setView([13.04628, 80.25350], 18);
+  maxBoundsViscosity: 1.0,
+  zoomControl: false,
+  /*rotate: true,
+  bearing: -50,
+  touchRotate: true,*/
+  rotateControl: false
+}).setView([13.0482, 80.2552], 18);
 
+// Add zoom control
+L.control.zoom({ position: 'bottomright' }).addTo(map);
+
+// ===============================
+// MAP LAYERS (STREET + SATELLITE)
+// ===============================
+
+// street view 
+const streetLayer = L.tileLayer(
+  'https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png',
+  {
+    minZoom: 18,
+    maxZoom: 23,
+    maxNativeZoom: 19,
+    attribution: '© OpenStreetMap'
+  }
+);
+
+// Satellite view 
+const satelliteLayer = L.tileLayer(
+  'https://server.arcgisonline.com/ArcGIS/rest/services/World_Imagery/MapServer/tile/{z}/{y}/{x}',
+  {
+    minZoom: 18,
+    maxZoom: 23,
+    maxNativeZoom: 19,
+    attribution: '© Esri'
+  }
+);
+
+// Load DEFAULT view
+streetLayer.addTo(map);
+
+// Layer switch control 
+const baseMaps = {
+  "Street View": streetLayer,
+  "Satellite View": satelliteLayer
+};
+
+L.control.layers(baseMaps, null, { position: 'bottomright' }).addTo(map);
+
+/*
 L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
   maxZoom: 23,
   maxNativeZoom: 19,
   minZoom: 18
 }).addTo(map);
+*/
 
 // Lock dragging
 map.on('drag', function () {
   map.panInsideBounds(campusBounds, { animate: false });
 });
+
+
 
 // ===============================
 // 3. ICONS
@@ -46,12 +97,24 @@ const icons = {
 function getTreeCategory(name) {
   name = name.toLowerCase();
 
-  if (name.includes("coconut") || name.includes("thennai")) return "coconut";
-  if (name.includes("palm")) return "palm";
-  if (name.includes("neem")) return "neem";
-  if (name.includes("mango") || name.includes("jack") || name.includes("guava") || name.includes("tamarind") || name.includes("cashew")) return "fruit";
-  if (name.includes("ashoka") || name.includes("polyalthia") || name.includes("christmas")) return "avenue";
-  if (name.includes("gulmohar") || name.includes("jacaranda") || name.includes("peepal")) return "flower";
+  if (name.includes("coconut") || name.includes("thennai"))
+    return "coconut";
+
+  if (name.includes("palm"))
+    return "palm";
+
+  if (name.includes("neem"))
+    return "neem";
+
+  if (name.includes("mango") || name.includes("jack") || name.includes("guava") || name.includes("tamarind") || name.includes("cashew"))
+    return "fruit";
+
+  if (name.includes("ashoka") || name.includes("polyalthia") || name.includes("christmas"))
+    return "avenue";
+
+  if (name.includes("gulmohar") || name.includes("jacaranda") || name.includes("peepal"))
+    return "flower";
+
   return "other";
 }
 
@@ -70,10 +133,8 @@ function createDot(lat, lon, popupContent) {
 // ===============================
 // 6. LAYERS
 // ===============================
-const treeLayer = L.layerGroup().addTo(map); // visible on map
+const treeLayer = L.layerGroup().addTo(map);
 const allTrees = [];
-const searchLayer = L.featureGroup().addTo(map); // now it is attached to map
-searchLayer.eachLayer(layer => layer.setOpacity(0)); // make invisible if needed
 
 // ===============================
 // 7. LOAD CSV
@@ -103,23 +164,20 @@ Papa.parse("trees.csv", {
 
       const category = getTreeCategory(tree.TreeName || "");
 
-      // Create marker (icon) and dot
-      const marker = L.marker([lat, lon], { icon: icons[category] }).bindPopup(popupContent);
+      // Create tree icon
+      const marker = L.marker([lat, lon], { icon: icons[category] })
+        .bindPopup(popupContent);
+
+      // Create dot
       const dot = createDot(lat, lon, popupContent);
 
-      // Add feature properties for search
-      marker.feature = { properties: { TreeName: tree.TreeName, BotanicalName: tree.BotanicalName } };
-
-      // lowercase for filtering
+      // Search fields
       marker.treeName = (tree.TreeName || "").toLowerCase();
       marker.botanicalName = (tree.BotanicalName || "").toLowerCase();
       dot.treeName = marker.treeName;
       dot.botanicalName = marker.botanicalName;
 
       allTrees.push({ marker, dot });
-
-      // Add marker to search layer (hidden)
-      searchLayer.addLayer(marker);
     });
 
     // ===============================
@@ -142,34 +200,28 @@ Papa.parse("trees.csv", {
     // 9. SEARCH
     // ===============================
     const search = new L.Control.Search({
-      layer: searchLayer,           // use hidden layer for search
+      layer: treeLayer,
       propertyName: 'TreeName',
       marker: false,
-      textPlaceholder: 'Search Tree',
-      position: 'topleft'
+      textPlaceholder: 'Search Tree'
     });
 
     map.addControl(search);
 
-    function filterTrees(query) {
-      const q = query.toLowerCase();
+    search.on('search:locationfound', function(e) {
+      const text = e.text.toLowerCase();
+      treeLayer.clearLayers();
+
       allTrees.forEach(t => {
-        const m = map.getZoom() <= 18 ? t.dot : t.marker;
-        if (t.marker.treeName.includes(q) || t.marker.botanicalName.includes(q)) {
-          if (!treeLayer.hasLayer(m)) treeLayer.addLayer(m);
-        } else {
-          treeLayer.removeLayer(m);
+        const m = map.getZoom() <= 19 ? t.dot : t.marker;
+        if (m.treeName.includes(text) || m.botanicalName.includes(text)) {
+          treeLayer.addLayer(m);
         }
       });
-    }
-
-    search.on('search:locationfound', function(e) {
-      filterTrees(e.text);
     });
 
     search.on('search:collapsed', function() {
-      refreshMarkers(); // reset to show all trees
+      refreshMarkers();
     });
-
   }
 });
