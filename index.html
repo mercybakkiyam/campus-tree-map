@@ -6,15 +6,12 @@
 
 <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css"/>
 <link rel="stylesheet" href="https://unpkg.com/leaflet-control-search/dist/leaflet-search.css"/>
+<link rel="stylesheet" href="https://unpkg.com/leaflet-rotate/dist/leaflet-rotate.css" />
+
 
 <style>
 body { margin: 0; font-family: Arial, sans-serif; }
 #map { height: 100vh; width: 100%; }
-.leaflet-control-search {
-  display: block !important;
-  z-index: 1000;
-}
-
 
 .leaflet-popup-content-wrapper {
   border-radius: 12px;
@@ -58,6 +55,66 @@ body { margin: 0; font-family: Arial, sans-serif; }
   border-radius: 5px;
   font-size: 12px;
 }
+
+/* ===============================
+   LEAFLET CONTROL STYLING
+   =============================== */
+
+/* Common control container */
+.leaflet-control {
+  border-radius: 10px !important;
+  box-shadow: 0 4px 12px rgba(0,0,0,0.25) !important;
+  overflow: hidden;
+  border: none !important;
+  background: #ffffff;
+}
+
+/* Zoom control (+ / -) */
+.leaflet-control-zoom a {
+  width: 10px;
+  height: 10px;
+  line-height: 36px;
+  font-size: 10px;
+  font-weight: bold;
+  color: #333;
+  background: #ffffff;
+  border: none !important;
+}
+
+.leaflet-control-zoom a:hover {
+  background: #f0f0f0;
+}
+
+/* Remove divider line between + and - */
+.leaflet-control-zoom a:first-child {
+  border-bottom: 1px solid #e0e0e0 !important;
+}
+
+/* Layer control box */
+.leaflet-control-layers {
+  border-radius: 10px !important;
+  padding: 1px 1px;
+}
+
+/* Layer list text */
+.leaflet-control-layers label {
+  font-size: 12px;
+  font-weight: 500;
+  color: #333;
+  cursor: pointer;
+}
+
+/* Radio buttons spacing */
+.leaflet-control-layers input {
+  margin-right: 6px;
+}
+
+/* Make controls float slightly inward */
+.leaflet-top.leaflet-left {
+  margin-top: 15px;
+  margin-left: 15px;
+}
+
 </style>
 </head>
 
@@ -67,6 +124,7 @@ body { margin: 0; font-family: Arial, sans-serif; }
 <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
 <script src="https://unpkg.com/leaflet-control-search/dist/leaflet-search.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.3.2/papaparse.min.js"></script>
+<script src="https://unpkg.com/leaflet-rotate/dist/leaflet-rotate.js"></script>
 
 <script src="script.js"></script>
 </body>
