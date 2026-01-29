@@ -136,6 +136,33 @@ function createDot(lat, lon, popupContent) {
 const treeLayer = L.layerGroup().addTo(map);
 const allTrees = [];
 
+//for search
+
+let searchText = ""; 
+let selectedCategory = "all";
+
+// ===============================
+// 7. REFRESH LOGIC (for search)
+// ===============================
+function refreshMarkers() {
+  treeLayer.clearLayers();
+
+  allTrees.forEach(t => {
+    const textMatch =
+      t.marker.treeName.includes(searchText) ||
+      t.marker.botanicalName.includes(searchText);
+
+    const categoryMatch =
+      selectedCategory === "all" || t.category === selectedCategory;
+
+    if (textMatch && categoryMatch) {
+      treeLayer.addLayer(map.getZoom() <= 18 ? t.dot : t.marker);
+    }
+  });
+}
+
+map.on("zoomend", refreshMarkers);
+
 // ===============================
 // 7. LOAD CSV
 // ===============================
@@ -199,29 +226,30 @@ Papa.parse("trees.csv", {
     // ===============================
     // 9. SEARCH
     // ===============================
-    const search = new L.Control.Search({
-      layer: treeLayer,
-      propertyName: 'TreeName',
-      marker: false,
-      textPlaceholder: 'Search Tree'
-    });
+    const searchControl = L.control({ position: "topleft" });
 
-    map.addControl(search);
+searchControl.onAdd = function () {
+  const div = L.DomUtil.create("div", "leaflet-control custom");
+  div.innerHTML = `
+    <div class="search-wrapper">
+      <input
+        id="treeSearch"
+        type="text"
+        placeholder="Search tree or botanical name">
+    </div>
+  `;
+  L.DomEvent.disableClickPropagation(div);
+  return div;
+};
 
-    search.on('search:locationfound', function(e) {
-      const text = e.text.toLowerCase();
-      treeLayer.clearLayers();
+searchControl.addTo(map);
 
-      allTrees.forEach(t => {
-        const m = map.getZoom() <= 19 ? t.dot : t.marker;
-        if (m.treeName.includes(text) || m.botanicalName.includes(text)) {
-          treeLayer.addLayer(m);
-        }
-      });
-    });
-
-    search.on('search:collapsed', function() {
-      refreshMarkers();
-    });
-  }
+let debounceTimer;
+document.getElementById("treeSearch").addEventListener("input", e => {
+  clearTimeout(debounceTimer);
+  debounceTimer = setTimeout(() => {
+    searchText = e.target.value.toLowerCase();
+    refreshMarkers();
+  }, 300);
 });
+
