@@ -207,19 +207,6 @@ Papa.parse("trees.csv", {
       allTrees.push({ marker, dot });
     });
 
-    // ===============================
-    // 8. ZOOM SWITCHING
-    // ===============================
-    function refreshMarkers() {
-      treeLayer.clearLayers();
-
-      if (map.getZoom() <= 18) {
-        allTrees.forEach(t => treeLayer.addLayer(t.dot));
-      } else {
-        allTrees.forEach(t => treeLayer.addLayer(t.marker));
-      }
-    }
-
     map.on("zoomend", refreshMarkers);
     refreshMarkers();
 
@@ -252,4 +239,5 @@ document.getElementById("treeSearch").addEventListener("input", e => {
     refreshMarkers();
   }, 300);
 });
+
 
